@@ -29,7 +29,7 @@ Resources:
               commands:
                 - echo Build started on `date`
                 - echo Building the Docker image...
-                - docker build -t freaky-api-friday .
+                - docker build -t freaky-api-friday:latest .
             post_build:
               commands:
                 - echo Build completed on `date`
@@ -38,8 +38,6 @@ Resources:
                 - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/freaky-api-friday:latest
         Type: "GITHUB"
         Location: "https://github.com/GittyBitch/FreakyAPIFriday.git"
-        BuildSpec: |
-          version: 0.1
 
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -75,6 +73,10 @@ Resources:
                   - "ecr:GetLifecyclePolicyPreview"
                   - "ecr:ListTagsForResource"
                   - "ecr:DescribeImageScanFindings"
+                  - "ecr:PutImage"  # Needed for pushing images
+                  - "ecr:InitiateLayerUpload"  # Needed for pushing images
+                  - "ecr:UploadLayerPart"  # Needed for pushing images
+                  - "ecr:CompleteLayerUpload"  # Needed for pushing images
                 Resource: '*'
 
 
