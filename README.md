@@ -24,4 +24,6 @@ Was passieren sollte, ist:
 - das image landet im aws docker repo (ECR)
 - (to be continued)
 
+# Idea
 
+Wir nehmen Fargate um "serverlos" das main.py Script auszuführen.
