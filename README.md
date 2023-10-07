@@ -1,3 +1,11 @@
+# What
+
+- Python 3.0 Script
+- fastapi Beispiele (Route / Funktion)
+- uvicorn als Webserver
+- unittest für ein Dutzend Tests
+- aws CloudFormation zwecks IaC
+- aws CodeBuild zwecks Docker Image Erzeugung
 
 # Intro
 
