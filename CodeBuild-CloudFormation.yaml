@@ -1,0 +1,78 @@
+Resources:
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties: 
+      Artifacts: 
+        Type: "NO_ARTIFACTS"
+      Environment: 
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        EnvironmentVariables: 
+          - Name: "AWS_ACCOUNT_ID"
+            Value: !Sub "${AWS::AccountId}"
+        Image: "aws/codebuild/standard:4.0"
+        PrivilegedMode: true
+        Type: "LINUX_CONTAINER"
+      Name: "FreakyAPIFriday"
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source: 
+        BuildSpec: |
+          version: 0.2
+          phases:
+            pre_build:
+              commands:
+                - echo Logging in to Amazon ECR...
+                - aws --version
+                - $(aws ecr get-login --region eu-central-1 --no-include-email)
+            build:
+              commands:
+                - echo Build started on `date`
+                - echo Building the Docker image...
+                - docker build -t freaky-api-friday .
+            post_build:
+              commands:
+                - echo Build completed on `date`
+                - echo Tagging and pushing the Docker image to ECR...
+                - docker tag freaky-api-friday:latest $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/freaky-api-friday:latest
+                - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/freaky-api-friday:latest
+        Type: "GITHUB"
+        Location: "https://github.com/GittyBitch/FreakyAPIFriday.git"
+        BuildSpec: |
+          version: 0.1
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:GetRepositoryPolicy"
+                  - "ecr:DescribeRepositories"
+                  - "ecr:ListImages"
+                  - "ecr:DescribeImages"
+                  - "ecr:BatchGetImage"
+                  - "ecr:GetLifecyclePolicy"
+                  - "ecr:GetLifecyclePolicyPreview"
+                  - "ecr:ListTagsForResource"
+                  - "ecr:DescribeImageScanFindings"
+                Resource: '*'
+
+

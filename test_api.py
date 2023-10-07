@@ -27,7 +27,7 @@ class TestDependencies(unittest.TestCase):
         import uvicorn
         return
     def testFoundMainModule(self):
-        import main2
+        import main
 
 class TestAPIRoutes(unittest.TestCase):
     def testRoute(self):
