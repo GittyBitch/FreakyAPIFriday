@@ -9,6 +9,8 @@ Resources:
         EnvironmentVariables: 
           - Name: "AWS_ACCOUNT_ID"
             Value: !Sub "${AWS::AccountId}"
+          - Name: "AWS_REGION"
+            Value: !Sub "${AWS::Region}"
         Image: "aws/codebuild/standard:4.0"
         PrivilegedMode: true
         Type: "LINUX_CONTAINER"
@@ -22,7 +24,7 @@ Resources:
               commands:
                 - echo Logging in to Amazon ECR...
                 - aws --version
-                - $(aws ecr get-login --region eu-central-1 --no-include-email)
+                - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
             build:
               commands:
                 - echo Build started on `date`
@@ -32,8 +34,8 @@ Resources:
               commands:
                 - echo Build completed on `date`
                 - echo Tagging and pushing the Docker image to ECR...
-                - docker tag freaky-api-friday:latest $AWS_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/freaky-api-friday:latest
-                - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/freaky-api-friday:latest
+                - docker tag freaky-api-friday:latest $AWS_ACCOUNT_ID.dkr.$AWS_REGION.amazonaws.com/freaky-api-friday:latest
+                - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/freaky-api-friday:latest
         Type: "GITHUB"
         Location: "https://github.com/GittyBitch/FreakyAPIFriday.git"
         BuildSpec: |
